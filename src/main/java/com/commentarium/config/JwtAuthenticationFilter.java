@@ -1,5 +1,6 @@
 package com.commentarium.config;
 
+import com.commentarium.repositories.TokenRepository;
 import com.commentarium.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,13 +24,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
   private final UserDetailsService userDetailsService;
+  private final TokenRepository tokenRepository;
 
   @Override
   protected void doFilterInternal(
-          @NonNull HttpServletRequest request,
-          @NonNull HttpServletResponse response,
-          @NonNull FilterChain filterChain
-  ) throws ServletException, IOException {
+      @NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
+      @NonNull FilterChain filterChain) throws ServletException, IOException {
 
     if (request.getServletPath().contains("/api/v1/auth")) {
       filterChain.doFilter(request, response);
@@ -46,17 +47,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     jwtToken = authHeader.substring(7);
     userEmail = jwtService.extractUsername(jwtToken);
-    if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
+    if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
       UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-      if(jwtService.isTokenValid(jwtToken, userDetails)){
+      var isTokenValid = tokenRepository.findByToken(jwtToken)
+          .map(t -> !t.isExpired() && !t.isRevoked())
+          .orElse(false);
+      if (jwtService.isTokenValid(jwtToken, userDetails) && isTokenValid) {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                userDetails,
-                null,
-                userDetails.getAuthorities()
-        );
+            userDetails,
+            null,
+            userDetails.getAuthorities());
         authToken.setDetails(
-                new WebAuthenticationDetailsSource().buildDetails(request)
-        );
+            new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
       }
     }

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="users")
+@Table(name = "users")
 public class User implements UserDetails {
 
     @Id
@@ -30,6 +29,7 @@ public class User implements UserDetails {
 
     private String lastName;
 
+    @SuppressWarnings("unused")
     private String username;
 
     private String email;
@@ -38,6 +38,9 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -50,12 +53,12 @@ public class User implements UserDetails {
     }
 
     @Override
-    public String getUsername(){
+    public String getUsername() {
         return email;
     }
 
     @Override
-    public String getPassword(){
+    public String getPassword() {
         return password;
     }
 
@@ -66,7 +69,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-         return UserDetails.super.isCredentialsNonExpired();
+        return UserDetails.super.isCredentialsNonExpired();
     }
 
     @Override
