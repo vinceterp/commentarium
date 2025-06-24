@@ -1,0 +1,1 @@
+Spring application for commentarium with jwt (refresh token) authentication and authorization
