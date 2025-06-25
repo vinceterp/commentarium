@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,12 +24,17 @@ public class AuthenticationController {
 
   @PostMapping("/register")
   public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
-    return ResponseEntity.ok(service.register(request));
+    AuthenticationResponse response = service.register(request);
+    if (response.getToken() == null){
+      return ResponseEntity.status(HttpStatusCode.valueOf(500)).body(response);
+    }
+    return ResponseEntity.ok(response);
   }
 
   @PostMapping("/authenticate")
   public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-    return ResponseEntity.ok(service.authenticate(request));
+    AuthenticationResponse response = service.authenticate(request);
+    return ResponseEntity.ok(response);
   }
 
   @PostMapping("/refresh-token")
