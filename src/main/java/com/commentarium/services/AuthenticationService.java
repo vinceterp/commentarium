@@ -42,7 +42,7 @@ public class AuthenticationService {
                                         .email(request.getEmail())
                                         .password(passwordEncoder.encode(request.getPassword()))
                                         .username(request.getUsername())
-                                        .role(Role.USER)
+                                        .role(request.getRole() != null ? request.getRole() : Role.USER)
                                         .build();
                         var savedUser = repository.save(user);
 
