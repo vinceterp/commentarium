@@ -54,6 +54,12 @@ public class AuthenticationService {
 
                         return AuthenticationResponse.builder()
                                         .token(jwtToken)
+                                        .email(savedUser.getEmail())
+                                        .firstName(savedUser.getFirstName())
+                                        .lastName(savedUser.getLastName())
+                                        .username(savedUser.getUsername())
+                                        .role(savedUser.getRole().name())
+                                        .message("User registered successfully")
                                         .refreshToken(refreshToken)
                                         .build();
                 }
@@ -68,7 +74,7 @@ public class AuthenticationService {
                                                 request.getEmail(),
                                                 request.getPassword()));
 
-                var user = repository.findByEmail(request.getEmail())
+                User user = repository.findByEmail(request.getEmail())
                                 .orElseThrow();
 
                 var jwtToken = jwtService.generateToken(user);
@@ -78,6 +84,12 @@ public class AuthenticationService {
                 return AuthenticationResponse.builder()
                                 .token(jwtToken)
                                 .refreshToken(refreshToken)
+                                .firstName(user.getFirstName())
+                                .lastName(user.getLastName())
+                                .email(user.getEmail())
+                                .username(user.getUsername())
+                                .role(user.getRole().name())
+                                .message("User authenticated successfully")
                                 .build();
         }
 
