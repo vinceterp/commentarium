@@ -101,12 +101,30 @@
 				"url": "localhost:8080/api/v1/health"
 			},
 			"response": []
+		},
+		{
+			"name": "createPost",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"originalUrl\": \"https://123.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:8080/api/v1/posts"
+			},
+			"response": []
 		}
 	],
 	"auth": {
 		"type": "bearer",
 		"bearer": {
-			"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBlbWFpbC5jb20iLCJpYXQiOjE3NTA3OTYzOTksImV4cCI6MTc1MDc5NjQ1OX0.ym4nLJRcFzhotIKsM_M_KdQRtTzUb9Qt1YhzdkXzGj4"
+			"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBlbWFpbC5jb20iLCJpYXQiOjE3NTA5OTE5OTIsImV4cCI6MTc1MDk5MzQzMn0.5xkT15JkE8rfj8hDqqkEBZyS23nwgpLtdD4iqXuv6Bk"
 		}
 	},
 	"event": [
