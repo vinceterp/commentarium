@@ -30,27 +30,33 @@ public class PostsController {
     }
 
     private PostDTO toDTO(Post post) {
-        PostDTO dto = new PostDTO();
 
-        dto.setId(post.getId());
-        dto.setAuthor(post.getAuthor());
-        dto.setCreatedAt(post.getCreatedAt());
-        dto.setOriginalUrl(post.getOriginalUrl());
-        dto.setComments(post.getComments().stream()
-                .filter(c -> c.getParent() == null)
-                .map(this::toDTO)
-                .collect(Collectors.toList()));
+        PostDTO dto = PostDTO.builder()
+                .id(post.getId())
+                .author(post.getAuthor())
+                .createdAt(post.getCreatedAt())
+                .originalUrl(post.getOriginalUrl())
+                .title(post.getTitle())
+                .comments(post.getComments().stream()
+                        .filter(c -> c.getParent() == null)
+                        .map(this::toDTO)
+                        .collect(Collectors.toList()))
+
+                .build();
         return dto;
     }
 
     private CommentDTO toDTO(Comment comment) {
-        CommentDTO dto = new CommentDTO();
-        dto.setId(comment.getId());
-        dto.setAuthor(comment.getAuthor());
-        dto.setContent(comment.getContent());
-        dto.setReplies(comment.getReplies().stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList()));
+        CommentDTO dto = CommentDTO.builder()
+                .id(comment.getId())
+                .author(comment.getAuthor())
+                .content(comment.getContent())
+                .likeCount(comment.getLikeCount())
+                .createdAt(comment.getCreatedAt().toString())
+                .replies(comment.getReplies().stream()
+                        .map(this::toDTO)
+                        .collect(Collectors.toList()))
+                .build();
         return dto;
     }
 
