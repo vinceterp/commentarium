@@ -32,6 +32,8 @@ public class Post {
 
     private String originalUrl;
 
+    private String title;
+
     public void addComment(Comment comment) {
         comments.add(comment);
         comment.setPost(this);

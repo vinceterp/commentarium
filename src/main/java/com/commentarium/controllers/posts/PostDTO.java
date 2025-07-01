@@ -21,4 +21,5 @@ public class PostDTO {
     private List<CommentDTO> comments;
     private String originalUrl;
     private Date createdAt;
+    private String title;
 }
