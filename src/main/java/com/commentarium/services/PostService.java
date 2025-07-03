@@ -33,6 +33,7 @@ public class PostService {
                 .title(videoDetails.getItems().get(0).getSnippet().getTitle())
                 .createdAt(new java.util.Date())
                 .comments(new java.util.ArrayList<Comment>())
+                .viewCount(videoDetails.getItems().get(0).getStatistics().getViewCount())
                 .build();
         Post savedPost = postRepository.save(post);
 

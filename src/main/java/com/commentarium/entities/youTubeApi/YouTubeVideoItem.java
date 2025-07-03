@@ -8,4 +8,5 @@ public class YouTubeVideoItem {
     private String etag;
     private String id;
     private Snippet snippet;
+    private Statistics statistics;
 }

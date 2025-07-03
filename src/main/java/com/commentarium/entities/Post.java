@@ -34,6 +34,9 @@ public class Post {
 
     private String title;
 
+    @Transient
+    private String viewCount;
+
     public void addComment(Comment comment) {
         comments.add(comment);
         comment.setPost(this);
