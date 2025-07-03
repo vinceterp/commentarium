@@ -22,4 +22,5 @@ public class PostDTO {
     private String originalUrl;
     private Date createdAt;
     private String title;
+    private String viewCount;
 }

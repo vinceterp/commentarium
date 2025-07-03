@@ -37,6 +37,7 @@ public class PostsController {
                 .createdAt(post.getCreatedAt())
                 .originalUrl(post.getOriginalUrl())
                 .title(post.getTitle())
+                .viewCount(post.getViewCount())
                 .comments(post.getComments().stream()
                         .filter(c -> c.getParent() == null)
                         .map(this::toDTO)
