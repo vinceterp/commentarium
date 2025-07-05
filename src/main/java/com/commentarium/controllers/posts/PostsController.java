@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.commentarium.controllers.comments.CommentDTO;
 import com.commentarium.entities.Comment;
+import com.commentarium.entities.CommentariumApiHelper;
 import com.commentarium.entities.Post;
 import com.commentarium.services.PostService;
 
@@ -24,26 +25,40 @@ public class PostsController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<PostDTO> createPost(@RequestBody PostsRequest request) {
-        Post createdPost = postService.createPost(request);
-        return ResponseEntity.ok(toDTO(createdPost));
+    public ResponseEntity<CommentariumApiHelper<PostDTO>> createPost(@RequestBody PostsRequest request) {
+        CommentariumApiHelper<Post> createdPost = postService.createPost(request);
+        if (createdPost.getData() == null) {
+            return ResponseEntity.status(500).body(toDTO(createdPost.getData(), createdPost.getMessage()));
+        }
+        return ResponseEntity.ok(toDTO(createdPost.getData(), createdPost.getMessage()));
     }
 
-    private PostDTO toDTO(Post post) {
+    private CommentariumApiHelper<PostDTO> toDTO(Post post, String message) {
 
-        PostDTO dto = PostDTO.builder()
-                .id(post.getId())
-                .author(post.getAuthor())
-                .createdAt(post.getCreatedAt())
-                .originalUrl(post.getOriginalUrl())
-                .title(post.getTitle())
-                .viewCount(post.getViewCount())
-                .comments(post.getComments().stream()
-                        .filter(c -> c.getParent() == null)
-                        .map(this::toDTO)
-                        .collect(Collectors.toList()))
+        if (post == null) {
+            return CommentariumApiHelper.<PostDTO>builder()
+                    .message(message)
+                    .status("failure")
+                    .data(null)
+                    .build();
+        }
 
+        CommentariumApiHelper<PostDTO> dto = CommentariumApiHelper.<PostDTO>builder()
+                .message(message)
+                .status("success")
+                .data(PostDTO.builder().id(post.getId())
+                        .author(post.getAuthor())
+                        .createdAt(post.getCreatedAt())
+                        .originalUrl(post.getOriginalUrl())
+                        .title(post.getTitle())
+                        .viewCount(post.getViewCount())
+                        .comments(post.getComments().stream()
+                                .filter(c -> c.getParent() == null)
+                                .map(this::toDTO)
+                                .collect(Collectors.toList()))
+                        .build())
                 .build();
+
         return dto;
     }
 
@@ -60,5 +75,4 @@ public class PostsController {
                 .build();
         return dto;
     }
-
 }
