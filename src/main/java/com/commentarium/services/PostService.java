@@ -74,6 +74,29 @@ public class PostService {
 
     }
 
+    public CommentariumApiHelper<Post> getPostByVideoId(String videoId) {
+        // Build the youtube url from the videoId
+        String youtubeUrl = "https://www.youtube.com/watch?v=" + videoId;
+        Optional<Post> post = postRepository.findOneByOriginalUrl(youtubeUrl);
+
+        YouTubeVideoListResponse videoDetails = youtubeApiClient.getVideoDetails(youtubeUrl);
+
+        if (post.isPresent()) {
+            post.get().setViewCount(videoDetails.getItems().get(0).getStatistics().getViewCount());
+            return CommentariumApiHelper.<Post>builder()
+                    .message("Post found")
+                    .status("success")
+                    .data(post.get())
+                    .build();
+        } else {
+            return CommentariumApiHelper.<Post>builder()
+                    .message("Post not found")
+                    .status("failure")
+                    .data(null)
+                    .build();
+        }
+    }
+
     public Optional<Post> getPostWithComments(Long postId) {
         return postRepository.findById(postId);
     }
