@@ -1,5 +1,6 @@
 package com.commentarium.controllers.posts;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,9 +29,11 @@ public class PostsController {
     public ResponseEntity<CommentariumApiHelper<PostDTO>> createPost(@RequestBody PostsRequest request) {
         CommentariumApiHelper<Post> createdPost = postService.createPost(request);
         if (createdPost.getData() == null) {
-            return ResponseEntity.status(500).body(toDTO(createdPost.getData(), createdPost.getMessage()));
+            return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .body(toDTO(createdPost.getData(), createdPost.getMessage()));
         }
-        return ResponseEntity.ok(toDTO(createdPost.getData(), createdPost.getMessage()));
+        return ResponseEntity.status(HttpServletResponse.SC_OK)
+                .body(toDTO(createdPost.getData(), createdPost.getMessage()));
     }
 
     private CommentariumApiHelper<PostDTO> toDTO(Post post, String message) {
@@ -46,7 +49,8 @@ public class PostsController {
         CommentariumApiHelper<PostDTO> dto = CommentariumApiHelper.<PostDTO>builder()
                 .message(message)
                 .status("success")
-                .data(PostDTO.builder().id(post.getId())
+                .data(PostDTO.builder()
+                        .id(post.getId())
                         .author(post.getAuthor())
                         .createdAt(post.getCreatedAt())
                         .originalUrl(post.getOriginalUrl())
