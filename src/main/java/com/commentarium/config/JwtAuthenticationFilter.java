@@ -73,12 +73,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       response.getWriter().flush();
       response.getWriter().close();
       return;
-    } catch (Exception e) {
-      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-      response.getWriter().write("Invalid JWT token");
-      response.getWriter().flush();
-      response.getWriter().close();
-      return;
     }
 
   }

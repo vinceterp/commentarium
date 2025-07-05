@@ -25,7 +25,7 @@ public class AuthenticationController {
   @PostMapping("/register")
   public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
     AuthenticationResponse response = service.register(request);
-    if (response.getToken() == null){
+    if (response.getToken() == null) {
       return ResponseEntity.status(HttpStatusCode.valueOf(500)).body(response);
     }
     return ResponseEntity.ok(response);
@@ -34,6 +34,9 @@ public class AuthenticationController {
   @PostMapping("/authenticate")
   public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
     AuthenticationResponse response = service.authenticate(request);
+    if (response.getToken() == null) {
+      return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(response);
+    }
     return ResponseEntity.ok(response);
   }
 

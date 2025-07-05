@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.commentarium.config.YoutubeApiClient;
 import com.commentarium.controllers.posts.PostsRequest;
 import com.commentarium.entities.Comment;
+import com.commentarium.entities.CommentariumApiHelper;
 import com.commentarium.entities.Post;
 import com.commentarium.entities.User;
 import com.commentarium.entities.youTubeApi.YouTubeVideoListResponse;
@@ -21,23 +22,56 @@ public class PostService {
     private final YoutubeApiClient youtubeApiClient;
     private final PostRepository postRepository;
 
-    public Post createPost(PostsRequest request) {
+    public CommentariumApiHelper<Post> createPost(PostsRequest request) {
 
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        try {
+            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        YouTubeVideoListResponse videoDetails = youtubeApiClient.getVideoDetails(request.getOriginalUrl());
+            if (user == null) {
+                throw new RuntimeException("User not authenticated");
+            }
 
-        Post post = Post.builder()
-                .author(user)
-                .originalUrl(request.getOriginalUrl())
-                .title(videoDetails.getItems().get(0).getSnippet().getTitle())
-                .createdAt(new java.util.Date())
-                .comments(new java.util.ArrayList<Comment>())
-                .viewCount(videoDetails.getItems().get(0).getStatistics().getViewCount())
-                .build();
-        Post savedPost = postRepository.save(post);
+            // Check if the post already exists
+            Optional<Post> existingPost = postRepository.findOneByOriginalUrl(request.getOriginalUrl());
+            if (existingPost.isPresent()) {
+                return CommentariumApiHelper.<Post>builder()
+                        .message("Post already exists")
+                        .status("success")
+                        .data(null)
+                        .build();
+            }
 
-        return savedPost;
+            YouTubeVideoListResponse videoDetails = youtubeApiClient.getVideoDetails(request.getOriginalUrl());
+            if (videoDetails.getItems().isEmpty()) {
+                throw new RuntimeException("Video not found or invalid URL");
+            }
+
+            Post post = Post.builder()
+                    .author(user)
+                    .originalUrl(request.getOriginalUrl())
+                    .title(videoDetails.getItems().get(0).getSnippet().getTitle())
+                    .createdAt(new java.util.Date())
+                    .comments(new java.util.ArrayList<Comment>())
+                    .viewCount(videoDetails.getItems().get(0).getStatistics().getViewCount())
+                    .build();
+            Post savedPost = postRepository.save(post);
+
+            CommentariumApiHelper<Post> response = CommentariumApiHelper.<Post>builder()
+                    .message("Post created successfully")
+                    .status("success")
+                    .data(savedPost)
+                    .build();
+
+            return response;
+        } catch (Exception e) {
+            return CommentariumApiHelper.<Post>builder()
+                    .message("Error creating post: " + e.getMessage())
+                    .status("error")
+                    .data(null)
+                    .build();
+
+        }
+
     }
 
     public Optional<Post> getPostWithComments(Long postId) {
