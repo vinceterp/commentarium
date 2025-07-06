@@ -50,7 +50,7 @@ public class CommentsController {
                                                         .data(null)
                                                         .build());
                 }
-                System.out.println("Fetching comments for postId: " + postId);
+
                 return ResponseEntity.ok(
                                 CommentariumApiHelper.<List<CommentDTO>>builder()
                                                 .message(comments.getMessage())
