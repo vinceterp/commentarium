@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.commentarium.config.YoutubeApiClient;
 import com.commentarium.controllers.posts.PostsRequest;
-import com.commentarium.entities.Comment;
 import com.commentarium.entities.CommentariumApiHelper;
 import com.commentarium.entities.Post;
 import com.commentarium.entities.User;
@@ -94,10 +93,6 @@ public class PostService {
                     .data(null)
                     .build();
         }
-    }
-
-    public Optional<Post> getPostWithComments(Long postId) {
-        return postRepository.findById(postId);
     }
 
 }

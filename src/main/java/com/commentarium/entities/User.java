@@ -50,6 +50,10 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "author")
     private List<Post> posts;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "author")
+    private List<Comment> comments;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

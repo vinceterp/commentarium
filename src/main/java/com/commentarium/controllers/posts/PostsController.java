@@ -8,15 +8,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.commentarium.controllers.comments.CommentDTO;
-import com.commentarium.entities.Comment;
 import com.commentarium.entities.CommentariumApiHelper;
 import com.commentarium.entities.Post;
 import com.commentarium.services.PostService;
 
 import lombok.RequiredArgsConstructor;
-
-import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -77,17 +73,4 @@ public class PostsController {
                 return dto;
         }
 
-        // private CommentDTO toDTO(Comment comment) {
-        // CommentDTO dto = CommentDTO.builder()
-        // .id(comment.getId())
-        // .author(comment.getUserId())
-        // .content(comment.getContent())
-        // .likeCount(comment.getLikeCount())
-        // .createdAt(comment.getCreatedAt().toString())
-        // .replies(comment.getReplies().stream()
-        // .map(this::toDTO)
-        // .collect(Collectors.toList()))
-        // .build();
-        // return dto;
-        // }
 }

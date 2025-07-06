@@ -1,5 +1,8 @@
 package com.commentarium.services;
 
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +22,35 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
 
+    public CommentariumApiHelper<List<Comment>> getCommentsByPostId(Long postId, Pageable pageable) {
+        try {
+            // Check if the post exists
+            if (!postRepository.existsById(postId)) {
+                throw new RuntimeException("Post not found");
+            }
+            List<Comment> comments = commentRepository.findByPostId(postId, pageable);
+
+            return CommentariumApiHelper.<List<Comment>>builder()
+                    .message("Comments fetched successfully")
+                    .status("success")
+                    .data(comments)
+                    .build();
+        } catch (Exception e) {
+            return CommentariumApiHelper.<List<Comment>>builder()
+                    .message("Error fetching comments: " + e.getMessage())
+                    .status("error")
+                    .data(null)
+                    .build();
+        }
+    }
+
     public CommentariumApiHelper<String> createComment(CommentRequest request) {
         try {
-            // Validate the request
-
             User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+            if (user == null) {
+                throw new RuntimeException("User not authenticated");
+            }
             if (request.getPostId() == null || request.getContent() == null || request.getContent().isEmpty()) {
                 return CommentariumApiHelper.<String>builder()
                         .message("Invalid request data")
@@ -55,16 +82,16 @@ public class CommentService {
                     .content(request.getContent())
                     .parent(parentComment)
                     .likeCount(0) // Initialize like count to 0
-                    .userId(user.getId()) // Assuming User has a getId() method
+                    .author(user) // Assuming User has a getId() method
                     .createdAt(new java.util.Date())
                     .build();
 
-            commentRepository.save(comment);
+            Comment createdComment = commentRepository.save(comment);
 
             return CommentariumApiHelper.<String>builder()
                     .message("Comment created successfully")
                     .status("success")
-                    .data("Comment ID: " + comment.getId())
+                    .data("Comment ID: " + createdComment.getId())
                     .build();
         } catch (Exception e) {
             return CommentariumApiHelper.<String>builder()
