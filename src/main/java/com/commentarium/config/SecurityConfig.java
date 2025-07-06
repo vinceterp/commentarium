@@ -1,7 +1,6 @@
 package com.commentarium.config;
 
 import jakarta.servlet.Filter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -23,6 +23,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
         @Value("${spring.application.cors.allowed-origins}")
@@ -48,6 +49,8 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(authorize -> authorize
                                                 .requestMatchers("/api/v1/auth/**").permitAll()
                                                 .requestMatchers("/api/v1/health").permitAll()
+                                                .requestMatchers("/api/v1/posts").permitAll()
+                                                .requestMatchers("/api/v1/comments").permitAll()
                                                 .anyRequest()
                                                 .authenticated())
                                 .sessionManagement(

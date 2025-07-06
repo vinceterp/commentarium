@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.commentarium.config.YoutubeApiClient;
 import com.commentarium.controllers.posts.PostsRequest;
-import com.commentarium.entities.Comment;
 import com.commentarium.entities.CommentariumApiHelper;
 import com.commentarium.entities.Post;
 import com.commentarium.entities.User;
@@ -51,7 +50,6 @@ public class PostService {
                     .originalUrl(request.getOriginalUrl())
                     .title(videoDetails.getItems().get(0).getSnippet().getTitle())
                     .createdAt(new java.util.Date())
-                    .comments(new java.util.ArrayList<Comment>())
                     .viewCount(videoDetails.getItems().get(0).getStatistics().getViewCount())
                     .build();
             Post savedPost = postRepository.save(post);
@@ -74,8 +72,27 @@ public class PostService {
 
     }
 
-    public Optional<Post> getPostWithComments(Long postId) {
-        return postRepository.findById(postId);
+    public CommentariumApiHelper<Post> getPostByVideoId(String videoId) {
+        // Build the youtube url from the videoId
+        String youtubeUrl = "https://www.youtube.com/watch?v=" + videoId;
+        Optional<Post> post = postRepository.findOneByOriginalUrl(youtubeUrl);
+
+        YouTubeVideoListResponse videoDetails = youtubeApiClient.getVideoDetails(youtubeUrl);
+
+        if (post.isPresent()) {
+            post.get().setViewCount(videoDetails.getItems().get(0).getStatistics().getViewCount());
+            return CommentariumApiHelper.<Post>builder()
+                    .message("Post found")
+                    .status("success")
+                    .data(post.get())
+                    .build();
+        } else {
+            return CommentariumApiHelper.<Post>builder()
+                    .message("Post not found")
+                    .status("failure")
+                    .data(null)
+                    .build();
+        }
     }
 
 }
