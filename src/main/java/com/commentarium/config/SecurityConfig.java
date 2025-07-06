@@ -49,9 +49,8 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(authorize -> authorize
                                                 .requestMatchers("/api/v1/auth/**").permitAll()
                                                 .requestMatchers("/api/v1/health").permitAll()
-                                                .requestMatchers("/api/v1/posts").permitAll() // Handle Security in the
-                                                                                              // PostsController per
-                                                                                              // request
+                                                .requestMatchers("/api/v1/posts").permitAll()
+                                                .requestMatchers("/api/v1/comments").permitAll()
                                                 .anyRequest()
                                                 .authenticated())
                                 .sessionManagement(

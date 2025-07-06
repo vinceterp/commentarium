@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -72,27 +71,23 @@ public class PostsController {
                                                 .originalUrl(post.getOriginalUrl())
                                                 .title(post.getTitle())
                                                 .viewCount(post.getViewCount())
-                                                .comments(post.getComments().stream()
-                                                                .filter(c -> c.getParent() == null)
-                                                                .map(this::toDTO)
-                                                                .collect(Collectors.toList()))
                                                 .build())
                                 .build();
 
                 return dto;
         }
 
-        private CommentDTO toDTO(Comment comment) {
-                CommentDTO dto = CommentDTO.builder()
-                                .id(comment.getId())
-                                .author(comment.getAuthor())
-                                .content(comment.getContent())
-                                .likeCount(comment.getLikeCount())
-                                .createdAt(comment.getCreatedAt().toString())
-                                .replies(comment.getReplies().stream()
-                                                .map(this::toDTO)
-                                                .collect(Collectors.toList()))
-                                .build();
-                return dto;
-        }
+        // private CommentDTO toDTO(Comment comment) {
+        // CommentDTO dto = CommentDTO.builder()
+        // .id(comment.getId())
+        // .author(comment.getUserId())
+        // .content(comment.getContent())
+        // .likeCount(comment.getLikeCount())
+        // .createdAt(comment.getCreatedAt().toString())
+        // .replies(comment.getReplies().stream()
+        // .map(this::toDTO)
+        // .collect(Collectors.toList()))
+        // .build();
+        // return dto;
+        // }
 }

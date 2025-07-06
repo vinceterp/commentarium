@@ -1,21 +1,16 @@
 package com.commentarium.controllers.comments;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Builder
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentDTO {
-    private Long id;
-    private Long author;
+public class CommentRequest {
+    private Long postId;
     private String content;
-    private List<CommentDTO> replies;
-    private int likeCount;
-    private String createdAt;
+    private Long parentCommentId; // Optional, for replies to comments
 }

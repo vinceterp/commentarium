@@ -6,9 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.util.Date;
-import java.util.List;
 
-import com.commentarium.controllers.comments.CommentDTO;
 import com.commentarium.entities.User;
 
 @Builder
@@ -18,7 +16,6 @@ import com.commentarium.entities.User;
 public class PostDTO {
     private Long id;
     private User author;
-    private List<CommentDTO> comments;
     private String originalUrl;
     private Date createdAt;
     private String title;

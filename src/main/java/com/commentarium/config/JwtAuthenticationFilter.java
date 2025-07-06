@@ -39,6 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     if (path.contains("/api/v1/auth") ||
         path.contains("/api/v1/health") ||
+        (path.equals("/api/v1/comments") && method.equals("GET")) ||
         (path.equals("/api/v1/posts") && method.equals("GET"))) {
       filterChain.doFilter(request, response);
       return;
