@@ -31,7 +31,6 @@ public class User implements UserDetails {
 
     private String lastName;
 
-    @SuppressWarnings("unused")
     private String username;
 
     private String email;
@@ -66,6 +65,10 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
+        return username;
+    }
+
+    public String getEmail() {
         return email;
     }
 

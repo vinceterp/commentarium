@@ -11,4 +11,6 @@ import com.commentarium.entities.Comment;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     @EntityGraph(attributePaths = { "author" })
     List<Comment> findByPostId(Long postId, Pageable Pageable);
+
+    boolean existsByIdAndPostId(Long id, Long postId);
 }

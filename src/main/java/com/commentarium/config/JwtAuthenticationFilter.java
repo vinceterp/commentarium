@@ -1,6 +1,7 @@
 package com.commentarium.config;
 
 import com.commentarium.repositories.TokenRepository;
+import com.commentarium.services.CommentariumUserDetailsService;
 import com.commentarium.services.JwtService;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -13,7 +14,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -25,7 +25,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
-  private final UserDetailsService userDetailsService;
+  private final CommentariumUserDetailsService userDetailsService;
   private final TokenRepository tokenRepository;
 
   @Override

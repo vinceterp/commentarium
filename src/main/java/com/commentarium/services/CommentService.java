@@ -29,11 +29,14 @@ public class CommentService {
                 throw new RuntimeException("Post not found");
             }
             List<Comment> comments = commentRepository.findByPostId(postId, pageable);
-
+            // Only include top-level comments (parent == null)
+            List<Comment> topLevelComments = comments.stream()
+                    .filter(c -> c.getParent() == null)
+                    .toList();
             return CommentariumApiHelper.<List<Comment>>builder()
                     .message("Comments fetched successfully")
                     .status("success")
-                    .data(comments)
+                    .data(topLevelComments)
                     .build();
         } catch (Exception e) {
             return CommentariumApiHelper.<List<Comment>>builder()
@@ -51,31 +54,28 @@ public class CommentService {
             if (user == null) {
                 throw new RuntimeException("User not authenticated");
             }
+
             if (request.getPostId() == null || request.getContent() == null || request.getContent().isEmpty()) {
-                return CommentariumApiHelper.<String>builder()
-                        .message("Invalid request data")
-                        .status("error")
-                        .data(null)
-                        .build();
+                throw new RuntimeException("Invalid request data");
             }
-            // Check if the post exists (you might want to implement this check)
-            // Optional: You can add a check to see if the post with request.getPostId()
-            // exists
+
             if (!postRepository.existsById(request.getPostId())) {
-                return CommentariumApiHelper.<String>builder()
-                        .message("Post not found")
-                        .status("error")
-                        .data(null)
-                        .build();
+                throw new RuntimeException("Post not found");
             }
 
-            // Get parent comment based on parentCommentId if provided
+            // Get parent comment based on parentCommentId and postId if provided
             Comment parentComment = null;
-            if (request.getParentCommentId() != null) {
-                parentComment = commentRepository.findById(request.getParentCommentId())
-                        .orElseThrow(() -> new RuntimeException("Parent comment not found"));
+            if (request.getParentCommentId() != null
+                    && !commentRepository.existsByIdAndPostId(request.getParentCommentId(), request.getPostId())) {
+                throw new RuntimeException("Parent comment not found");
+
             }
 
+            if (request.getParentCommentId() != null) {
+                // Fetch the parent comment if parentCommentId is provided
+                parentComment = commentRepository.findById(request.getParentCommentId())
+                        .orElse(null); // If parentCommentId is not provided, this will be null
+            }
             // Create and save the comment
             Comment comment = Comment.builder()
                     .postId(request.getPostId())

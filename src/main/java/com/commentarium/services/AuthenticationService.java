@@ -34,8 +34,13 @@ public class AuthenticationService {
 
 	public AuthenticationResponse register(RegisterRequest request) {
 
-		var foundUser = repository.findByEmail(request.getEmail());
-		if (foundUser.isEmpty()) {
+		try {
+			if (repository.findByEmail(request.getEmail()).isPresent()) {
+				throw new RuntimeException("Email already in use");
+			}
+			if (repository.findByUsername(request.getUsername()).isPresent()) {
+				throw new RuntimeException("Username already in use");
+			}
 			var user = User.builder()
 					.firstName(request.getFirstName())
 					.lastName(request.getLastName())
@@ -62,10 +67,12 @@ public class AuthenticationService {
 					.message("User registered successfully")
 					.refreshToken(refreshToken)
 					.build();
+
+		} catch (Exception e) {
+			return AuthenticationResponse.builder()
+					.message("Error during registration: " + e.getMessage())
+					.build();
 		}
-		return AuthenticationResponse.builder()
-				.message("User already exists, login instead")
-				.build();
 	}
 
 	public AuthenticationResponse authenticate(AuthenticationRequest request) {
