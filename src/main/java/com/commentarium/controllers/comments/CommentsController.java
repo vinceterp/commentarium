@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,6 +59,27 @@ public class CommentsController {
                                                                 .map(this::toDTO)
                                                                 .collect(Collectors.toList()))
                                                 .build());
+        }
+
+        @DeleteMapping
+        public ResponseEntity<CommentariumApiHelper<String>> deleteComment(@RequestBody DeleteCommentRequest request) {
+                CommentariumApiHelper<String> deletedComment = commentService.deleteComment(request.getCommentId(),
+                                request.getPostId());
+                if (deletedComment.getData() == null) {
+                        return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                                        .body(CommentariumApiHelper.<String>builder()
+                                                        .message("Error deleting comment: "
+                                                                        + deletedComment.getMessage())
+                                                        .status("error")
+                                                        .data(null)
+                                                        .build());
+                }
+                return ResponseEntity.ok(CommentariumApiHelper.<String>builder()
+                                .message(deletedComment.getMessage())
+                                .status(deletedComment.getStatus())
+                                .data(deletedComment.getData())
+                                .build());
+
         }
 
         private CommentDTO toDTO(Comment comment) {

@@ -1,6 +1,7 @@
 package com.commentarium.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.commentarium.controllers.comments.CommentRequest;
 import com.commentarium.entities.Comment;
 import com.commentarium.entities.CommentariumApiHelper;
+import com.commentarium.entities.Role;
 import com.commentarium.entities.User;
 import com.commentarium.repositories.CommentRepository;
 import com.commentarium.repositories.PostRepository;
@@ -96,6 +98,67 @@ public class CommentService {
         } catch (Exception e) {
             return CommentariumApiHelper.<String>builder()
                     .message("Error creating comment: " + e.getMessage())
+                    .status("error")
+                    .data(null)
+                    .build();
+        }
+    }
+
+    public CommentariumApiHelper<String> deleteComment(Long commentId, Long postId) {
+        try {
+
+            Optional<Comment> comment = commentRepository.findByIdAndPostId(commentId, postId);
+            if (comment.isEmpty()) {
+                throw new RuntimeException("Comment not found for the given post");
+            }
+
+            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+            if (user == null || !user.getId().equals(comment.get().getAuthor().getId())
+                    && !user.getRole().equals(Role.ADMIN)) {
+                throw new RuntimeException("User not authorized to delete this comment");
+            }
+
+            commentRepository.deleteById(commentId);
+
+            return CommentariumApiHelper.<String>builder()
+                    .message("Comment deleted successfully")
+                    .status("success")
+                    .data("Comment ID: " + commentId)
+                    .build();
+        } catch (Exception e) {
+            return CommentariumApiHelper.<String>builder()
+                    .message("Error deleting comment: " + e.getMessage())
+                    .status("error")
+                    .data(null)
+                    .build();
+        }
+    }
+
+    public CommentariumApiHelper<String> updateComment(Long commentId, Long postId, String content) {
+        try {
+
+            Optional<Comment> comment = commentRepository.findByIdAndPostId(commentId, postId);
+
+            if (comment.isEmpty()) {
+                throw new RuntimeException("Comment not found for the given post");
+            }
+
+            if (content == null || content.isEmpty()) {
+                throw new RuntimeException("Content cannot be empty");
+            }
+            Comment existingComment = comment.get();
+            existingComment.setContent(content);
+            existingComment.setUpdatedAt(new java.util.Date()); // Assuming you have an updatedAt field
+            commentRepository.save(existingComment);
+            return CommentariumApiHelper.<String>builder()
+                    .message("Comment updated successfully")
+                    .status("success")
+                    .data(null)
+                    .build();
+        } catch (Exception e) {
+            return CommentariumApiHelper.<String>builder()
+                    .message("Error updating comment: " + e.getMessage())
                     .status("error")
                     .data(null)
                     .build();
