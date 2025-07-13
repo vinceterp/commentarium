@@ -18,6 +18,6 @@ public class CommentDTO {
     private User author;
     private String content;
     private List<CommentDTO> replies;
-    private int likeCount;
+    private List<Long> likes;
     private String createdAt;
 }

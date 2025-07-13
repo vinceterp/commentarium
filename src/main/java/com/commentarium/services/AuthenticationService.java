@@ -64,6 +64,7 @@ public class AuthenticationService {
 					.lastName(savedUser.getLastName())
 					.username(savedUser.getUsername())
 					.role(savedUser.getRole().name())
+					.userId(savedUser.getId())
 					.message("User registered successfully")
 					.refreshToken(refreshToken)
 					.build();
@@ -97,6 +98,7 @@ public class AuthenticationService {
 					.email(user.getEmail())
 					.username(user.getUsername())
 					.role(user.getRole().name())
+					.userId(user.getId())
 					.message("User authenticated successfully")
 					.build();
 		} catch (Exception e) {

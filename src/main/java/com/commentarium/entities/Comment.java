@@ -30,7 +30,8 @@ public class Comment {
 
     private Long postId;
 
-    private int likeCount;
+    @Column(nullable = false)
+    private List<Long> likes = new ArrayList<Long>();
 
     private Date createdAt;
 
