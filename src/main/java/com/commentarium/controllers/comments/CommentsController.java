@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,23 +64,24 @@ public class CommentsController {
 
         @DeleteMapping
         public ResponseEntity<CommentariumApiHelper<String>> deleteComment(@RequestBody DeleteCommentRequest request) {
-                CommentariumApiHelper<String> deletedComment = commentService.deleteComment(request.getCommentId(),
-                                request.getPostId());
+                CommentariumApiHelper<String> deletedComment = commentService.deleteComment(request);
                 if (deletedComment.getData() == null) {
                         return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-                                        .body(CommentariumApiHelper.<String>builder()
-                                                        .message("Error deleting comment: "
-                                                                        + deletedComment.getMessage())
-                                                        .status("error")
-                                                        .data(null)
-                                                        .build());
+                                        .body(deletedComment);
                 }
-                return ResponseEntity.ok(CommentariumApiHelper.<String>builder()
-                                .message(deletedComment.getMessage())
-                                .status(deletedComment.getStatus())
-                                .data(deletedComment.getData())
-                                .build());
+                return ResponseEntity.ok(deletedComment);
 
+        }
+
+        @PatchMapping
+        public ResponseEntity<CommentariumApiHelper<String>> updateComment(
+                        @RequestBody UpdateCommentRequest request) {
+                CommentariumApiHelper<String> updatedComment = commentService.updateComment(request);
+                if (updatedComment.getData() == null) {
+                        return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                                        .body(updatedComment);
+                }
+                return ResponseEntity.ok(updatedComment);
         }
 
         private CommentDTO toDTO(Comment comment) {

@@ -8,6 +8,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.commentarium.controllers.comments.CommentRequest;
+import com.commentarium.controllers.comments.DeleteCommentRequest;
+import com.commentarium.controllers.comments.UpdateCommentRequest;
 import com.commentarium.entities.Comment;
 import com.commentarium.entities.CommentariumApiHelper;
 import com.commentarium.entities.Role;
@@ -104,10 +106,11 @@ public class CommentService {
         }
     }
 
-    public CommentariumApiHelper<String> deleteComment(Long commentId, Long postId) {
+    public CommentariumApiHelper<String> deleteComment(DeleteCommentRequest request) {
         try {
 
-            Optional<Comment> comment = commentRepository.findByIdAndPostId(commentId, postId);
+            Optional<Comment> comment = commentRepository.findByIdAndPostId(request.getCommentId(),
+                    request.getPostId());
             if (comment.isEmpty()) {
                 throw new RuntimeException("Comment not found for the given post");
             }
@@ -119,12 +122,12 @@ public class CommentService {
                 throw new RuntimeException("User not authorized to delete this comment");
             }
 
-            commentRepository.deleteById(commentId);
+            commentRepository.deleteById(request.getCommentId());
 
             return CommentariumApiHelper.<String>builder()
                     .message("Comment deleted successfully")
                     .status("success")
-                    .data("Comment ID: " + commentId)
+                    .data("Comment ID: " + request.getCommentId())
                     .build();
         } catch (Exception e) {
             return CommentariumApiHelper.<String>builder()
@@ -135,26 +138,41 @@ public class CommentService {
         }
     }
 
-    public CommentariumApiHelper<String> updateComment(Long commentId, Long postId, String content) {
+    public CommentariumApiHelper<String> updateComment(UpdateCommentRequest request) {
         try {
 
-            Optional<Comment> comment = commentRepository.findByIdAndPostId(commentId, postId);
+            Optional<Comment> comment = commentRepository.findByIdAndPostId(request.getCommentId(),
+                    request.getPostId());
 
             if (comment.isEmpty()) {
                 throw new RuntimeException("Comment not found for the given post");
             }
 
-            if (content == null || content.isEmpty()) {
-                throw new RuntimeException("Content cannot be empty");
+            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (request.getContent() != null && (user == null || !user.getId().equals(comment.get().getAuthor().getId())
+                    && !user.getRole().equals(Role.ADMIN))) {
+                throw new RuntimeException("User not authorized to update this comment");
             }
+
+            if (request.getContent() == null && request.getLikedBy() == null) {
+                throw new RuntimeException("Both content and likedBy cannot be empty");
+            }
+
             Comment existingComment = comment.get();
-            existingComment.setContent(content);
+            if (request.getLikedBy() != null) {
+                // TO-DO Change the type of likedBy to a list of userIds if you want to track
+                // which users liked the comment
+                existingComment.setLikeCount(existingComment.getLikeCount() + 1);
+            }
+            if (request.getContent() != null && !request.getContent().isEmpty()) {
+                existingComment.setContent(request.getContent());
+            }
             existingComment.setUpdatedAt(new java.util.Date()); // Assuming you have an updatedAt field
             commentRepository.save(existingComment);
             return CommentariumApiHelper.<String>builder()
                     .message("Comment updated successfully")
                     .status("success")
-                    .data(null)
+                    .data("Comment ID: " + request.getCommentId())
                     .build();
         } catch (Exception e) {
             return CommentariumApiHelper.<String>builder()
