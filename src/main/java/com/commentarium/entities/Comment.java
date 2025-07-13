@@ -34,6 +34,8 @@ public class Comment {
 
     private Date createdAt;
 
+    private Date updatedAt;
+
     // Self-reference to parent comment
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")

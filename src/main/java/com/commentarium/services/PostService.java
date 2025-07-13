@@ -33,11 +33,7 @@ public class PostService {
             // Check if the post already exists
             Optional<Post> existingPost = postRepository.findOneByOriginalUrl(request.getOriginalUrl());
             if (existingPost.isPresent()) {
-                return CommentariumApiHelper.<Post>builder()
-                        .message("Post already exists")
-                        .status("success")
-                        .data(null)
-                        .build();
+                throw new RuntimeException("Post already exists for this URL");
             }
 
             YouTubeVideoListResponse videoDetails = youtubeApiClient.getVideoDetails(request.getOriginalUrl());
@@ -74,22 +70,28 @@ public class PostService {
 
     public CommentariumApiHelper<Post> getPostByVideoId(String videoId) {
         // Build the youtube url from the videoId
-        String youtubeUrl = "https://www.youtube.com/watch?v=" + videoId;
-        Optional<Post> post = postRepository.findOneByOriginalUrl(youtubeUrl);
+        try {
+            String youtubeUrl = "https://www.youtube.com/watch?v=" + videoId;
+            Optional<Post> post = postRepository.findOneByOriginalUrl(youtubeUrl);
 
-        YouTubeVideoListResponse videoDetails = youtubeApiClient.getVideoDetails(youtubeUrl);
+            if (post.isEmpty()) {
+                throw new RuntimeException("Post not found for the given video ID");
+            }
 
-        if (post.isPresent()) {
+            YouTubeVideoListResponse videoDetails = youtubeApiClient.getVideoDetails(youtubeUrl);
+
             post.get().setViewCount(videoDetails.getItems().get(0).getStatistics().getViewCount());
+
             return CommentariumApiHelper.<Post>builder()
                     .message("Post found")
                     .status("success")
                     .data(post.get())
                     .build();
-        } else {
+
+        } catch (Exception e) {
             return CommentariumApiHelper.<Post>builder()
-                    .message("Post not found")
-                    .status("failure")
+                    .message("Error fetching post: " + e.getMessage())
+                    .status("error")
                     .data(null)
                     .build();
         }
