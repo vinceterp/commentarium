@@ -18,4 +18,5 @@ public class AuthenticationResponse  {
     private String email;
     private String username;
     private String role;
+    private Long userId; // Optional: Include user ID if needed for client-side operations
 }

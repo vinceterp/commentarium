@@ -89,7 +89,7 @@ public class CommentsController {
                                 .id(comment.getId())
                                 .author(comment.getAuthor())
                                 .content(comment.getContent())
-                                .likeCount(comment.getLikeCount())
+                                .likes(comment.getLikes())
                                 .createdAt(comment.getCreatedAt().toString())
                                 .replies(comment.getReplies().stream()
                                                 .map(this::toDTO)

@@ -1,5 +1,6 @@
 package com.commentarium.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,13 +17,14 @@ import com.commentarium.entities.Role;
 import com.commentarium.entities.User;
 import com.commentarium.repositories.CommentRepository;
 import com.commentarium.repositories.PostRepository;
-
+import com.commentarium.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
 
+    private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
 
@@ -85,7 +87,7 @@ public class CommentService {
                     .postId(request.getPostId())
                     .content(request.getContent())
                     .parent(parentComment)
-                    .likeCount(0) // Initialize like count to 0
+                    .likes(new ArrayList<Long>()) // Initialize like count to 0
                     .author(user) // Assuming User has a getId() method
                     .createdAt(new java.util.Date())
                     .build();
@@ -159,10 +161,16 @@ public class CommentService {
             }
 
             Comment existingComment = comment.get();
-            if (request.getLikedBy() != null) {
-                // TO-DO Change the type of likedBy to a list of userIds if you want to track
-                // which users liked the comment
-                existingComment.setLikeCount(existingComment.getLikeCount() + 1);
+            ArrayList<Long> likes = new ArrayList<Long>(existingComment.getLikes());
+            Boolean likeByUserExists = userRepository.existsById(request.getLikedBy());
+            if (request.getLikedBy() != null && !likeByUserExists) {
+                throw new RuntimeException("User not found for the given likedBy ID");
+            }
+            if (request.getLikedBy() != null && likeByUserExists
+                    && !likes.contains(request.getLikedBy())) {
+
+                likes.add(request.getLikedBy());
+                existingComment.setLikes(likes);
             }
             if (request.getContent() != null && !request.getContent().isEmpty()) {
                 existingComment.setContent(request.getContent());
