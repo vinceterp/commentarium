@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeleteCommentRequest {
-    private Long postId;
     private Long commentId; // ID of the comment to be deleted
 }

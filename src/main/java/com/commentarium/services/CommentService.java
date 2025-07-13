@@ -111,8 +111,7 @@ public class CommentService {
     public CommentariumApiHelper<String> deleteComment(DeleteCommentRequest request) {
         try {
 
-            Optional<Comment> comment = commentRepository.findByIdAndPostId(request.getCommentId(),
-                    request.getPostId());
+            Optional<Comment> comment = commentRepository.findById(request.getCommentId());
             if (comment.isEmpty()) {
                 throw new RuntimeException("Comment not found for the given post");
             }
@@ -143,8 +142,7 @@ public class CommentService {
     public CommentariumApiHelper<String> updateComment(UpdateCommentRequest request) {
         try {
 
-            Optional<Comment> comment = commentRepository.findByIdAndPostId(request.getCommentId(),
-                    request.getPostId());
+            Optional<Comment> comment = commentRepository.findById(request.getCommentId());
 
             if (comment.isEmpty()) {
                 throw new RuntimeException("Comment not found for the given post");
@@ -156,26 +154,35 @@ public class CommentService {
                 throw new RuntimeException("User not authorized to update this comment");
             }
 
-            if (request.getContent() == null && request.getLikedBy() == null) {
+            if (request.getContent() == null && request.getLikedBy() == null && request.getUnlikedBy() == null) {
                 throw new RuntimeException("Both content and likedBy cannot be empty");
             }
 
             Comment existingComment = comment.get();
             ArrayList<Long> likes = new ArrayList<Long>(existingComment.getLikes());
-            Boolean likeByUserExists = userRepository.existsById(request.getLikedBy());
-            if (request.getLikedBy() != null && !likeByUserExists) {
+
+            if (request.getLikedBy() != null && !userRepository.existsById(request.getLikedBy())) {
                 throw new RuntimeException("User not found for the given likedBy ID");
             }
-            if (request.getLikedBy() != null && likeByUserExists
+
+            if (request.getLikedBy() != null && request.getUnlikedBy() != null) {
+                throw new RuntimeException("Only one of likedBy or unlikedBy can be present in the request");
+            }
+
+            if (request.getLikedBy() != null && userRepository.existsById(request.getLikedBy())
                     && !likes.contains(request.getLikedBy())) {
 
                 likes.add(request.getLikedBy());
                 existingComment.setLikes(likes);
             }
+            if (request.getUnlikedBy() != null && likes.contains(request.getUnlikedBy())) {
+                likes.remove(request.getUnlikedBy());
+                existingComment.setLikes(likes);
+            }
             if (request.getContent() != null && !request.getContent().isEmpty()) {
                 existingComment.setContent(request.getContent());
+                existingComment.setUpdatedAt(new java.util.Date()); // Assuming you have an updatedAt field
             }
-            existingComment.setUpdatedAt(new java.util.Date()); // Assuming you have an updatedAt field
             commentRepository.save(existingComment);
             return CommentariumApiHelper.<String>builder()
                     .message("Comment updated successfully")

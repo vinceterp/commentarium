@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class UpdateCommentRequest {
     private Long commentId;
     private String content; // Updated content of the comment
-    private Long postId; // ID of the post to which the comment belongs
     private Long likedBy;
+    private Long unlikedBy;
 }

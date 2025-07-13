@@ -5,7 +5,6 @@ import com.commentarium.controllers.auth.AuthenticationResponse;
 import com.commentarium.controllers.auth.RegisterRequest;
 import com.commentarium.entities.Role;
 import com.commentarium.entities.Token;
-import com.commentarium.entities.TokenType;
 import com.commentarium.entities.User;
 import com.commentarium.repositories.TokenRepository;
 import com.commentarium.repositories.UserRepository;
@@ -112,7 +111,6 @@ public class AuthenticationService {
 		var token = Token.builder()
 				.user(user)
 				.token(jwtToken)
-				.tokenType(TokenType.BEARER)
 				.expired(false)
 				.revoked(false)
 				.build();
