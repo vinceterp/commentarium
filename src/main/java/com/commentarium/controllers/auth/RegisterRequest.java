@@ -1,7 +1,5 @@
 package com.commentarium.controllers.auth;
 
-import com.commentarium.entities.Role;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,5 +15,4 @@ public class RegisterRequest {
     private String email;
     private String password;
     private String username;
-    private Role role;
 }

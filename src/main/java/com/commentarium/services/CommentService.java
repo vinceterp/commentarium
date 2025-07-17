@@ -28,31 +28,6 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
 
-    public CommentariumApiHelper<List<Comment>> getCommentsByPostId(Long postId, Pageable pageable) {
-        try {
-            // Check if the post exists
-            if (!postRepository.existsById(postId)) {
-                throw new RuntimeException("Post not found");
-            }
-            List<Comment> comments = commentRepository.findByPostId(postId, pageable);
-            // Only include top-level comments (parent == null)
-            List<Comment> topLevelComments = comments.stream()
-                    .filter(c -> c.getParent() == null)
-                    .toList();
-            return CommentariumApiHelper.<List<Comment>>builder()
-                    .message("Comments fetched successfully")
-                    .status("success")
-                    .data(topLevelComments)
-                    .build();
-        } catch (Exception e) {
-            return CommentariumApiHelper.<List<Comment>>builder()
-                    .message("Error fetching comments: " + e.getMessage())
-                    .status("error")
-                    .data(null)
-                    .build();
-        }
-    }
-
     public CommentariumApiHelper<String> createComment(CommentRequest request) {
         try {
             User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -108,31 +83,25 @@ public class CommentService {
         }
     }
 
-    public CommentariumApiHelper<String> deleteComment(DeleteCommentRequest request) {
+    public CommentariumApiHelper<List<Comment>> getCommentsByPostId(Long postId, Pageable pageable) {
         try {
-
-            Optional<Comment> comment = commentRepository.findById(request.getCommentId());
-            if (comment.isEmpty()) {
-                throw new RuntimeException("Comment not found for the given post");
+            // Check if the post exists
+            if (!postRepository.existsById(postId)) {
+                throw new RuntimeException("Post not found");
             }
-
-            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-            if (user == null || !user.getId().equals(comment.get().getAuthor().getId())
-                    && !user.getRole().equals(Role.ADMIN)) {
-                throw new RuntimeException("User not authorized to delete this comment");
-            }
-
-            commentRepository.deleteById(request.getCommentId());
-
-            return CommentariumApiHelper.<String>builder()
-                    .message("Comment deleted successfully")
+            List<Comment> comments = commentRepository.findByPostId(postId, pageable);
+            // Only include top-level comments (parent == null)
+            List<Comment> topLevelComments = comments.stream()
+                    .filter(c -> c.getParent() == null)
+                    .toList();
+            return CommentariumApiHelper.<List<Comment>>builder()
+                    .message("Comments fetched successfully")
                     .status("success")
-                    .data("Comment ID: " + request.getCommentId())
+                    .data(topLevelComments)
                     .build();
         } catch (Exception e) {
-            return CommentariumApiHelper.<String>builder()
-                    .message("Error deleting comment: " + e.getMessage())
+            return CommentariumApiHelper.<List<Comment>>builder()
+                    .message("Error fetching comments: " + e.getMessage())
                     .status("error")
                     .data(null)
                     .build();
@@ -192,6 +161,37 @@ public class CommentService {
         } catch (Exception e) {
             return CommentariumApiHelper.<String>builder()
                     .message("Error updating comment: " + e.getMessage())
+                    .status("error")
+                    .data(null)
+                    .build();
+        }
+    }
+
+    public CommentariumApiHelper<String> deleteComment(DeleteCommentRequest request) {
+        try {
+
+            Optional<Comment> comment = commentRepository.findById(request.getCommentId());
+            if (comment.isEmpty()) {
+                throw new RuntimeException("Comment not found for the given post");
+            }
+
+            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+            if (user == null || !user.getId().equals(comment.get().getAuthor().getId())
+                    && !user.getRole().equals(Role.ADMIN)) {
+                throw new RuntimeException("User not authorized to delete this comment");
+            }
+
+            commentRepository.deleteById(request.getCommentId());
+
+            return CommentariumApiHelper.<String>builder()
+                    .message("Comment deleted successfully")
+                    .status("success")
+                    .data("Comment ID: " + request.getCommentId())
+                    .build();
+        } catch (Exception e) {
+            return CommentariumApiHelper.<String>builder()
+                    .message("Error deleting comment: " + e.getMessage())
                     .status("error")
                     .data(null)
                     .build();

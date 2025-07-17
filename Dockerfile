@@ -19,7 +19,7 @@ RUN apt-get update && \
 COPY target/commentarium-0.0.1-SNAPSHOT.jar commentarium.jar
 
 # Copy .env file to the container
-COPY .env .env
+# COPY .env .env
 
 # Export environment variables from .env before running the app
 CMD ["/bin/sh", "-c", "export $(cat .env | xargs) && java -jar commentarium.jar"]

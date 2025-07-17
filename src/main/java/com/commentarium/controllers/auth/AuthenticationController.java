@@ -1,19 +1,21 @@
 package com.commentarium.controllers.auth;
 
+import java.io.IOException;
+
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.commentarium.entities.CommentariumApiHelper;
 import com.commentarium.services.AuthenticationService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-
-import java.io.IOException;
-
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -24,9 +26,9 @@ public class AuthenticationController {
 
   @PostMapping("/register")
   public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
-    AuthenticationResponse response = service.register(request);
+    AuthenticationResponse response = service.register(request, true, null);
     if (response.getToken() == null) {
-      return ResponseEntity.status(HttpStatusCode.valueOf(500)).body(response);
+      return ResponseEntity.status(HttpStatusCode.valueOf(400)).body(response);
     }
     return ResponseEntity.ok(response);
   }
@@ -36,6 +38,15 @@ public class AuthenticationController {
     AuthenticationResponse response = service.authenticate(request);
     if (response.getToken() == null) {
       return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(response);
+    }
+    return ResponseEntity.ok(response);
+  }
+
+  @PatchMapping("/verify-email")
+  public ResponseEntity<CommentariumApiHelper<String>> verifyEmail(@RequestBody EmailVerificationRequest request) {
+    CommentariumApiHelper<String> response = service.verifyEmail(request);
+    if (response.getData() == null) {
+      return ResponseEntity.status(HttpStatusCode.valueOf(400)).body(response);
     }
     return ResponseEntity.ok(response);
   }
