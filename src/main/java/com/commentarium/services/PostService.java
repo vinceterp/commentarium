@@ -12,6 +12,7 @@ import com.commentarium.entities.Post;
 import com.commentarium.entities.User;
 import com.commentarium.entities.youTubeApi.YouTubeVideoListResponse;
 import com.commentarium.repositories.PostRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -29,7 +30,6 @@ public class PostService {
             if (user == null) {
                 throw new RuntimeException("User not authenticated");
             }
-
             // Check if the post already exists
             Optional<Post> existingPost = postRepository.findOneByOriginalUrl(request.getOriginalUrl());
             if (existingPost.isPresent()) {
@@ -69,7 +69,7 @@ public class PostService {
     }
 
     public CommentariumApiHelper<Post> getPostByVideoId(String videoId) {
-        // Build the youtube url from the videoId
+        // Build the YouTube url from the videoId
         try {
             String youtubeUrl = "https://www.youtube.com/watch?v=" + videoId;
             Optional<Post> post = postRepository.findOneByOriginalUrl(youtubeUrl);

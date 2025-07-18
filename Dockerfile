@@ -3,8 +3,6 @@ FROM openjdk:21-jdk-slim
 # Set the working directory in the container
 WORKDIR /app
 
-
-
 # Expose the port the app runs on
 EXPOSE 8080
 
@@ -20,11 +18,8 @@ RUN apt-get update && \
 # Copy the built JAR file to the container
 COPY target/commentarium-0.0.1-SNAPSHOT.jar commentarium.jar
 
-
 # Copy .env file to the container
-COPY .env .env
-
-ENV JDBC_URL=jdbc:postgresql://host.docker.internal:5433/commentarium
+# COPY .env .env
 
 # Export environment variables from .env before running the app
 CMD ["/bin/sh", "-c", "export $(cat .env | xargs) && java -jar commentarium.jar"]

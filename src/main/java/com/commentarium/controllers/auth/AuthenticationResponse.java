@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse  {
+public class AuthenticationResponse {
     private String token;
     private String refreshToken;
     private String message;
@@ -19,4 +19,5 @@ public class AuthenticationResponse  {
     private String username;
     private String role;
     private Long userId; // Optional: Include user ID if needed for client-side operations
+    private Boolean isEmailVerified; // Optional: Include email verification status if needed
 }
