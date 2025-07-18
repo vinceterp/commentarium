@@ -27,7 +27,7 @@ public class AuthenticationController {
   @PostMapping("/register")
   public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
     AuthenticationResponse response = service.register(request, true, null);
-    if (response.getToken() == null) {
+    if (response.getUserId() == null) {
       return ResponseEntity.status(HttpStatusCode.valueOf(400)).body(response);
     }
     return ResponseEntity.ok(response);

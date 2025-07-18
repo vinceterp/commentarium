@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
+import com.commentarium.controllers.auth.AuthenticationRequest;
 import com.commentarium.controllers.auth.RegisterRequest;
 import com.commentarium.entities.Role;
 import com.commentarium.services.AuthenticationService;
@@ -40,7 +41,14 @@ public class CommentariumApplication {
 					.password(adminPassword)
 					.username("Admin")
 					.build();
-			System.out.println("Admin token: " + service.register(admin, false, Role.ADMIN).getToken());
+			service.register(admin, false, Role.ADMIN);
+			String token = service.authenticate(
+					AuthenticationRequest.builder()
+							.email(adminEmail)
+							.password(adminPassword)
+							.build())
+					.getToken();
+			System.out.println("Admin token: " + token);
 
 		};
 

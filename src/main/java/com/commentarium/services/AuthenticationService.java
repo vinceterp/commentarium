@@ -114,14 +114,14 @@ public class AuthenticationService {
 					.build();
 			var savedUser = userRepository.save(user);
 
-			var jwtToken = jwtService.generateToken(user);
+			// var jwtToken = jwtService.generateToken(user);
 
-			var refreshToken = jwtService.generateRefreshToken(user);
+			// var refreshToken = jwtService.generateRefreshToken(user);
 
-			saveUserToken(savedUser, jwtToken);
+			// saveUserToken(savedUser, jwtToken);
 
 			return AuthenticationResponse.builder()
-					.token(jwtToken)
+					// .token(jwtToken)
 					.email(savedUser.getEmail())
 					.firstName(savedUser.getFirstName())
 					.lastName(savedUser.getLastName())
@@ -129,7 +129,8 @@ public class AuthenticationService {
 					.role(savedUser.getRole().name())
 					.userId(savedUser.getId())
 					.message("User registered successfully")
-					.refreshToken(refreshToken)
+					.isEmailVerified(user.isEmailVerified())
+					// .refreshToken(refreshToken)
 					.build();
 
 		} catch (Exception e) {
@@ -149,6 +150,9 @@ public class AuthenticationService {
 			User user = userRepository.findByEmail(request.getEmail())
 					.orElseThrow();
 
+			if (!user.isEmailVerified()) {
+				throw new RuntimeException("Email not verified");
+			}
 			var jwtToken = jwtService.generateToken(user);
 			var refreshToken = jwtService.generateRefreshToken(user);
 			revokeAllUserTokens(user);
@@ -166,7 +170,7 @@ public class AuthenticationService {
 					.build();
 		} catch (Exception e) {
 			return AuthenticationResponse.builder()
-					.message("Invalid credentials")
+					.message(e.getMessage())
 					.build();
 		}
 	}
