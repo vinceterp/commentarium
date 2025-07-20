@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.util.Date;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import com.commentarium.controllers.auth.AuthenticationRequest;
 import com.commentarium.controllers.auth.AuthenticationResponse;
@@ -24,6 +27,7 @@ import com.commentarium.repositories.UserRepository;
 import com.commentarium.repositories.VerificationTokenRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +42,8 @@ public class AuthenticationService {
 	private final TokenRepository tokenRepository;
 	private final VerificationTokenRepository verificationTokenRepository;
 	private final EmailService emailService;
+	private final JavaMailSender javaMailSender;
+	private final TemplateEngine templateEngine;
 
 	public CommentariumApiHelper<String> verifyEmail(EmailVerificationRequest request) {
 		try {
@@ -96,12 +102,18 @@ public class AuthenticationService {
 						.createdAt(new Date(System.currentTimeMillis()))
 						.build();
 				verificationTokenRepository.save(verificationToken);
-				SimpleMailMessage emailMessage = new SimpleMailMessage();
-				emailMessage.setFrom("no-reply@commentarium.xyz");
-				emailMessage.setTo(request.getEmail());
-				emailMessage.setSubject("Email Verification");
-				emailMessage.setText("Your verification code is: " + verificationToken.getToken());
-				emailService.sendEmail(emailMessage);
+
+				Context context = new Context();
+				context.setVariable("code", verificationToken.getToken());
+
+				String htmlContent = templateEngine.process("email-verification.html", context);
+				MimeMessage emailMessage = javaMailSender.createMimeMessage();
+				MimeMessageHelper helper = new MimeMessageHelper(emailMessage, true);
+				helper.setFrom("no-reply@commentarium.xyz");
+				helper.setTo(request.getEmail());
+				helper.setSubject("Your Commentarium Verification Code");
+				helper.setText(htmlContent, true);
+				emailService.sendMimeMessage(emailMessage);
 			}
 
 			var user = User.builder()
