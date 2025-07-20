@@ -97,6 +97,7 @@ public class AuthenticationService {
 						.build();
 				verificationTokenRepository.save(verificationToken);
 				SimpleMailMessage emailMessage = new SimpleMailMessage();
+				emailMessage.setFrom("no-reply@commentarium.xyz");
 				emailMessage.setTo(request.getEmail());
 				emailMessage.setSubject("Email Verification");
 				emailMessage.setText("Your verification code is: " + verificationToken.getToken());
