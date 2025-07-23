@@ -219,14 +219,14 @@ public class AuthenticationService {
 			HttpServletResponse response) throws IOException {
 		final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 		final String refreshToken;
-		final String userEmail;
+		final String userName;
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			return;
 		}
 		refreshToken = authHeader.substring(7);
-		userEmail = jwtService.extractUsername(refreshToken);
-		if (userEmail != null) {
-			var user = userRepository.findByEmail(userEmail)
+		userName = jwtService.extractUsername(refreshToken);
+		if (userName != null) {
+			var user = userRepository.findByUsername(userName)
 					.orElseThrow();
 			if (jwtService.isTokenValid(refreshToken, user)) {
 				var accessToken = jwtService.generateToken(user);

@@ -9,8 +9,10 @@ import com.commentarium.config.YoutubeApiClient;
 import com.commentarium.controllers.posts.PostsRequest;
 import com.commentarium.entities.CommentariumApiHelper;
 import com.commentarium.entities.Post;
+import com.commentarium.entities.Role;
 import com.commentarium.entities.User;
 import com.commentarium.entities.youTubeApi.YouTubeVideoListResponse;
+import com.commentarium.repositories.CommentRepository;
 import com.commentarium.repositories.PostRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class PostService {
 
     private final YoutubeApiClient youtubeApiClient;
     private final PostRepository postRepository;
+    private final CommentRepository commentsRepository;
 
     public CommentariumApiHelper<Post> createPost(PostsRequest request) {
 
@@ -97,4 +100,36 @@ public class PostService {
         }
     }
 
+    public CommentariumApiHelper<String> deletePost(PostsRequest request) {
+        try {
+            if (request.getPostId() == null) {
+                throw new RuntimeException("Post ID is required for deletion");
+            }
+            Optional<Post> post = postRepository.findById(request.getPostId());
+            if (post.isEmpty()) {
+                throw new RuntimeException("Post not found for the given ID");
+            }
+
+            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (user == null || !user.getId().equals(post.get().getAuthor().getId()) && !user.getRole().equals(Role.ADMIN)) {
+                throw new RuntimeException("User not authorized to delete this post");
+            }
+
+            // Delete all comments associated with the post first
+            commentsRepository.deleteAllByPostId(post.get().getId());
+            postRepository.delete(post.get());
+
+            return CommentariumApiHelper.<String>builder()
+                    .message("Post deleted successfully")
+                    .status("success")
+                    .data("Post ID: " + request.getPostId())
+                    .build();
+        } catch (Exception e) {
+            return CommentariumApiHelper.<String>builder()
+                    .message("Error deleting post: " + e.getMessage())
+                    .status("error")
+                    .data(null)
+                    .build();
+        }
+    }
 }

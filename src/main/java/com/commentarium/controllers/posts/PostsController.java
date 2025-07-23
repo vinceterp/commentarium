@@ -1,21 +1,22 @@
 package com.commentarium.controllers.posts;
 
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.commentarium.entities.CommentariumApiHelper;
 import com.commentarium.entities.Post;
 import com.commentarium.services.PostService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -47,6 +48,19 @@ public class PostsController {
                                 .body(toDTO(post.getData(), post.getMessage()));
         }
 
+        @Transactional
+        @DeleteMapping
+        @PreAuthorize("isAuthenticated()")
+        public ResponseEntity<CommentariumApiHelper<String>> deletePost(@RequestBody PostsRequest request) {
+                CommentariumApiHelper<String> response = postService.deletePost(request);
+                if (response.getData() == null) {
+                        return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND)
+                                        .body(response);
+                }
+                return ResponseEntity.status(HttpServletResponse.SC_OK)
+                                .body(response);
+        }
+
         private CommentariumApiHelper<PostDTO> toDTO(Post post, String message) {
 
                 if (post == null) {
@@ -72,5 +86,7 @@ public class PostsController {
 
                 return dto;
         }
+
+
 
 }
