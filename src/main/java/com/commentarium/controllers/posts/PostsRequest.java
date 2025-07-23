@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PostsRequest {
     private String originalUrl;
+    private Long postId;
 }
