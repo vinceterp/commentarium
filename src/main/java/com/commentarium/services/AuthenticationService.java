@@ -115,13 +115,26 @@ public class AuthenticationService {
 				helper.setText(htmlContent, true);
 				emailService.sendMimeMessage(emailMessage);
 			}
-
+			// var userAvatar =
+			// `${user?.firstName?.charAt(0).toUpperCase()}${user?.lastName?.charAt(0).toUpperCase()}`
+			if (request.getAvatarUrl() == null || request.getAvatarUrl().isEmpty()) {
+				String initials = "";
+				if (request.getFirstName() != null && !request.getFirstName().isEmpty()) {
+					initials += Character.toUpperCase(request.getFirstName().charAt(0));
+				}
+				if (request.getLastName() != null && !request.getLastName().isEmpty()) {
+					initials += Character.toUpperCase(request.getLastName().charAt(0));
+				}
+				String userAvatar = "https://api.dicebear.com/9.x/initials/svg?seed=" + initials;
+				request.setAvatarUrl(userAvatar);
+			}
 			var user = User.builder()
 					.firstName(request.getFirstName())
 					.lastName(request.getLastName())
 					.email(request.getEmail())
 					.password(passwordEncoder.encode(request.getPassword()))
 					.username(request.getUsername())
+					.avatarUrl(request.getAvatarUrl())
 					.role(role != null ? role : Role.USER)
 					.isEmailVerified(!withEmailVerification) // Set to true if no email verification is needed
 					.build();
@@ -141,6 +154,7 @@ public class AuthenticationService {
 					.username(savedUser.getUsername())
 					.role(savedUser.getRole().name())
 					.userId(savedUser.getId())
+					.avatarUrl(savedUser.getAvatarUrl())
 					.message("User registered successfully")
 					.isEmailVerified(user.isEmailVerified())
 					// .refreshToken(refreshToken)
@@ -179,6 +193,8 @@ public class AuthenticationService {
 					.username(user.getUsername())
 					.role(user.getRole().name())
 					.userId(user.getId())
+					.avatarUrl(user.getAvatarUrl())
+					.isEmailVerified(user.isEmailVerified())
 					.message("User authenticated successfully")
 					.build();
 		} catch (Exception e) {

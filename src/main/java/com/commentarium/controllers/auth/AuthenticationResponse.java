@@ -18,6 +18,7 @@ public class AuthenticationResponse {
     private String email;
     private String username;
     private String role;
+    private String avatarUrl; // Optional: Include avatar URL if needed
     private Long userId; // Optional: Include user ID if needed for client-side operations
     private Boolean isEmailVerified; // Optional: Include email verification status if needed
 }

@@ -62,6 +62,8 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "author")
     private List<Comment> comments;
 
+    private String avatarUrl;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
